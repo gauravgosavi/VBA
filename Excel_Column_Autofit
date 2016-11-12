@@ -1,0 +1,40 @@
+Sub WorksheetLoop()
+
+    Dim directory As String, fileName As String, sheet As Worksheet, i As Integer, j As Integer
+    Application.ScreenUpdating = False
+    directory = "Your\Path\Here"
+    fileName = Dir(directory & "*.xl??")
+    Do While fileName <> ""
+        i = i + 1
+        j = 2
+        Cells(i, 1) = fileName
+        Workbooks.Open (directory & fileName)
+        Dim WS_Count As Integer
+        Dim countr As Integer
+        Dim this_sheet As Worksheet
+        
+        WS_Count = ActiveWorkbook.Worksheets.Count
+        ActiveWorkbook.Sheets(1).Select
+        ' Begin the loop.
+        For countr = 1 To WS_Count
+            Sheets(countr).Cells.Select
+            Sheets(countr).Cells.EntireColumn.AutoFit
+            Sheets(countr).Range("A1").Select
+            If countr < WS_Count Then
+                Sheets(countr).Next.Select
+            End If
+        Next countr
+        ActiveWorkbook.Sheets(1).Select
+        Application.DisplayAlerts = False
+        ThisWorkbook.CheckCompatibility = False
+        ThisWorkbook.Save
+        Application.DisplayAlerts = True
+        Workbooks(fileName).Close
+        fileName = Dir()
+    Loop
+    Application.ScreenUpdating = True
+    Application.DisplayAlerts = True
+
+
+End Sub
+            
