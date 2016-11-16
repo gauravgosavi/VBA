@@ -2,7 +2,7 @@ Sub WorksheetLoop()
 
     Dim directory As String, fileName As String, sheet As Worksheet, i As Integer, j As Integer
     Application.ScreenUpdating = False
-    directory = "Your\Path\Here"
+    directory = "Your\Path\Here\"
     fileName = Dir(directory & "*.xl??")
     Do While fileName <> ""
         i = i + 1
