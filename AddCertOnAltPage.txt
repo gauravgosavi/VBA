@@ -1,0 +1,85 @@
+
+Sub AddCertOnAltPage()
+'
+' 
+' Make sure your signature is saved here: C:\Users[your user name]\Pictures\signature.jpg
+' Make sure the certificate is saved here: P:\Forms\certificates\Certificate Of Translation.doc
+    Dim pathName As String
+    Dim o As Document
+    Set o = ActiveDocument
+    Dim fd As Office.FileDialog
+    Set fd = Application.FileDialog(msoFileDialogFilePicker)
+    fd.InitialFileName = "P:\Forms\certificates"
+    With fd
+      .AllowMultiSelect = False
+      
+      ' Set the title of the dialog box.
+      .Title = "Please select the file."
+      ' Clear out the current filters, and add our own.
+      .Filters.Clear
+      .Filters.Add "Word 2003", "*.doc"
+      .Filters.Add "Word 2007", "*.docx"
+      If .Show = True Then
+        txtFileName = .SelectedItems(1) 'replace txtFileName with your textbox
+        Documents.Open filename:=txtFileName
+            'Activate Certificate Document
+            Finl = Application.ActiveDocument
+            Selection.WholeStory 'Copy whole certificate
+            Selection.Copy
+            
+            Dim N, N1 As Integer
+            N = o.BuiltInDocumentProperties(wdPropertyPages) 'Get number of pages in document to be certified
+            Dim I As Integer
+            o.Activate
+            'Go to first character  on the first page i.e. beginning of document
+            Selection.GoTo What:=wdGoToSection, Which:=wdGoToFirst
+            If N = 1 Then
+                Selection.EndKey Unit:=wdStory
+                Selection.InsertNewPage
+                Documents(txtFileName).Activate
+                Selection.WholeStory
+                Selection.Copy
+                o.Activate
+                Call WaitFor(1)
+                Selection.GoTo What:=wdGoToPage, Which:=wdGoToFirst, Count:=2, name:=""
+                Call WaitFor(1)
+                Selection.PasteAndFormat (wdFormatOriginalFormatting)
+            Else
+            'insert certificate at every even number page therfore Step = 2
+            For I = 2 To 2 * N Step 2
+            o.Activate ' Activate document to be certified
+                Selection.GoTo What:=wdGoToPage, Which:=wdGoToFirst, Count:=I, name:=""
+                Selection.PasteAndFormat (wdFormatOriginalFormatting)
+                Call WaitFor(1) 'add delay of one second because MS word takes time to recalculate document properties
+                'insert a blank page in the end of document to paste certificate for last page
+                If I = (2 * N) - 2 Then
+                    Selection.EndKey Unit:=wdStory
+                    Selection.InsertNewPage
+                    Documents(txtFileName).Activate
+                    Selection.WholeStory
+                    Selection.Copy
+                End If
+                N1 = ActiveDocument.BuiltInDocumentProperties(wdPropertyPages)
+        Next
+        Selection.EndKey Unit:=wdStory
+        Documents(txtFileName).Close SaveChanges:=wdDoNotSaveChanges
+        Selection.TypeBackspace
+        End If
+        'Selection.TypeBackspace
+       Else
+            MsgBox ("No file selected")
+      End If
+    End With
+    'txtFileName.Select
+    'Dim Table1 As table
+End Sub
+	
+Sub WaitFor(NumOfSeconds As Long)
+Dim SngSec As Long
+SngSec = Timer + NumOfSeconds
+
+Do While Timer < SngSec
+DoEvents
+Loop
+
+End Sub
